@@ -4,9 +4,14 @@ import { useAuth } from "../context/AuthContext";
 const AuthRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
-  if (loading) return null;
+   if (user) {
+    // role based redirect
+    return user.role === "admin"
+      ? <Navigate to="/dashboard" replace />
+      : <Navigate to="/home" replace />;
+  }
 
-  return user ? <Navigate to="/dashboard"/> : children;
+  return children;
 };
 
 export default AuthRoute;

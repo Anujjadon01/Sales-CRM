@@ -6,7 +6,8 @@ import { toast } from "react-toastify";
 import { auth } from "../../firebase";
 import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png";
-import google from "../assets/goggle.png";
+import google from "../assets/google2.png";
+
 import authImg from "../assets/RightSide.png";
 
 function Register() {
@@ -78,7 +79,7 @@ function Register() {
               <img src={logo} className="w-8" alt="Logo" />
             </div>
             <h1 className="text-2xl font-black text-[#3B252C] tracking-tight italic">
-              Sales<span className="text-[#8F6593]">CRM</span>
+              Lead<span className="text-[#8F6593]">Flow</span>
             </h1>
           </div>
 
@@ -163,7 +164,7 @@ function Register() {
               </div>
 
               <button className="w-full h-16 rounded-2xl bg-[#8F6593] text-white font-black shadow-[0_15px_30px_-10px_rgba(143,101,147,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(143,101,147,0.6)] hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 group mt-6">
-                Enlist Account <ArrowRight size={18} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
+                Register <ArrowRight size={18} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
 

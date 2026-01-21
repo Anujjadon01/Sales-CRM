@@ -10,6 +10,7 @@ import {
   Menu,
   X,
   Sparkles,
+  Home,
 } from "lucide-react";
 import logo from "../assets/logo.png";
 import { useAuth } from "../context/AuthContext";
@@ -67,7 +68,7 @@ function Navbar() {
             </div>
             <div>
               <h2 className="font-black text-xl text-[var(--text-main)] tracking-tighter uppercase">
-                Sales<span className="text-[var(--accent-main)]">CRM</span>
+                Lead<span className="text-[var(--accent-main)]">Flow</span>
               </h2>
               <p className="text-[10px] font-bold text-[var(--text-main)]/40 tracking-widest uppercase -mt-1">Enterprise</p>
             </div>
@@ -85,9 +86,14 @@ function Navbar() {
         <div className="space-y-1">
           <p className="px-4 text-[10px] font-black text-[var(--text-main)]/30 uppercase tracking-[0.2em] mb-4">Main Menu</p>
           <nav className="flex flex-col gap-2">
-            <NavLink to="/dashboard" className={navLinkClass}>
-              <LayoutDashboard size={20} className="group-hover:rotate-12 transition-transform" />
+            <NavLink to={user?.role=="admin"?"/dashboard":"/home"} className={navLinkClass}>
+            {user.role=="admin"?(<>
+             <LayoutDashboard size={20} className="group-hover:rotate-12 transition-transform" />
               <span className="font-bold text-sm">Dashboard</span>
+            </>):(<>
+             <Home size={20} className="group-hover:rotate-12 transition-transform" />
+              <span className="font-bold text-sm">Home</span>
+            </>)}
             </NavLink>
 
             <NavLink to="/contact" className={navLinkClass}>
@@ -95,20 +101,14 @@ function Navbar() {
               <span className="font-bold text-sm">Contacts</span>
             </NavLink>
 
+{user.role=="user"&&
             <NavLink to="/pipeline" className={navLinkClass}>
               <ChartBar size={20} className="group-hover:rotate-12 transition-transform" />
               <span className="font-bold text-sm">Sales Pipeline</span>
             </NavLink>
+}
+            
 
-            <NavLink to="/revenue" className={navLinkClass}>
-              <ChartNoAxesColumn size={20} className="group-hover:rotate-12 transition-transform" />
-              <span className="font-bold text-sm">Revenue</span>
-            </NavLink>
-
-            <NavLink to="/task" className={navLinkClass}>
-              <CircleCheck size={20} className="group-hover:rotate-12 transition-transform" />
-              <span className="font-bold text-sm">My Tasks</span>
-            </NavLink>
           </nav>
         </div>
 

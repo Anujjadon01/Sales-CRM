@@ -9,7 +9,7 @@ import {
   changeProfilePicture,
 } from "../controllers/Auth.js";
 import { IsAuth } from "../middleware/IsAuth.js";
-import { upload } from "../utils/multer.js";
+import { upload } from "../utils/uploadImage.js";
 
 const authRouter = express.Router();
 

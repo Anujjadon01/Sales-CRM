@@ -1,37 +1,25 @@
-import multer from "multer"
+import multer from "multer";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import cloudinary from "./cloudinary.js";
 
+const leadsStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "leads_uploads",
+    resource_type: "raw",
+  },
+});
 
-const storage=new CloudinaryStorage({
-    cloudinary:cloudinary
-})
-
-export const upload=multer({storage})
-
-
-
-
-
-
-
-
-
-
-
-
-// const storage=multer.diskStorage({
-//     destination:(req,file,cb)=>{
-//         cb(null,"uploads/")
-//     },
-// filename:(req,file,cb)=>{
-//     cb(null,Date.now()+"-"+file.originalname)
-// }
-
-// })
-
-
-// export const upload=multer({storage})
-
-
-
+export const uploadLeadsFile = multer({
+  storage: leadsStorage,
+  fileFilter: (req, file, cb) => {
+    const allowed = [
+      "application/pdf",
+      "application/vnd.ms-excel",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+       "application/octet-stream"
+    ];
+    if (allowed.includes(file.mimetype)) cb(null, true);
+    else cb(new Error("Only PDF or Excel files allowed"));
+  },
+});

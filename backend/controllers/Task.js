@@ -1,71 +1,19 @@
-import ContactModel from "../models/ContackModel.js";
-import opportunityModel from "../models/OpportunityModel.js";
-import TaskModel from "../models/TaskModel.js";
-import TasksModel from "../models/Tasks.js";
 import UserModel from "../models/UserModel.js";
-
-export const AddTask = async (req, res) => {
-  try {
-    const { description, duedate, priority, searchcompany } = req.body;
-
-    const task = await TaskModel.create({
-      description,
-      due_date: duedate,
-      priority,
-      company_name: searchcompany,
-    });
-    return res.status(201).json({ message: "your task addded" });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-export const fetchTask = async (req, res) => {
-  try {
-    let task = await TaskModel.find();
-
-    return res.status(201).json({ task });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-export const EditTask = async (req, res) => {
-  try {
-    const { id } = req.params;
-    console.log(id);
-
-    const { description, duedate, priority, searchcompany } = req.body;
-
-    const task = await TaskModel.findByIdAndUpdate(
-      id,
-      {
-        description,
-        due_date: duedate,
-        priority,
-        company_name: searchcompany,
-      },
-      { new: true }
-    );
-    return res.status(201).json({ message: "your task edited" });
-  } catch (error) {
-    console.log(error);
-  }
-};
+import Leads from "../models/Lead.js";
+import AutoAssign from "../utils/AutoassignLeads.js"
 
 export const Lead = async (req, res) => {
   try {
-    const { fullname, email, phone,company_name ,linked, status,Assign } = req.body;
+    const { fullname, email, phone} = req.body;
 
-    const task = await ContactModel.create({
+    const lead = await Leads.create({
       fullname,
       email,
       phone,
-      company_name,
-      linked,
-      status,
-      Assign
+      status:"New Leads"
     });
+
+    await AutoAssign([lead])
     return res.status(201).json({ message: "your task addded" });
   } catch (error) {
     console.log(error);
@@ -74,157 +22,87 @@ export const Lead = async (req, res) => {
 
 export const GetLead = async (req, res) => {
   try {
-    const data = await ContactModel.find();
+    let data = await Leads.find({assignTo:req.user._id});
+    if (req.user.role=="admin") {
+     data = await Leads.find();
+    }
     return res.status(201).json(data);
   } catch (error) {
     console.log(error);
   }
 };
 
-export const opportunity = async (req, res) => {
+export const GetLeadDashboard = async (req, res) => {
   try {
-    const {
-      opportunitie,
-      company_name,
-      rate,
-      close_Date,
-      stage,
-      lead_Source,
-      AssignedTo,
-      Description,
-    } = req.body;
-
-    const dataToSave = {
-      opportunitie,
-      company_name,
-      rate,
-      close_Date,
-      stage,
-      lead_Source,
-      AssignedTo,
-      Description,
+    const Data = {
+      newLead: await Leads.countDocuments({ status: "New Leads" }),
+      interested: await Leads.countDocuments({ status: "Interested" }),
+      followUp: await Leads.countDocuments({ status: "Follow-up" }),
+      notReachable: await Leads.countDocuments({ status: "Not Reachable" }),
+      close: await Leads.countDocuments({ status: "Close" }),
     };
 
-    if (stage=="Close") {
-      dataToSave.closedAt=new Date()
-    }
-
-    let oppo = await opportunityModel.create(dataToSave);
-    return res.status(200).json({ message: "Add Successfully" });
+    return res.status(200).json(Data);
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    return res.status(500).json({ message: "Server Error" });
   }
 };
 
-export const GetOpportunity = async (req, res) => {
-  try {
-    const data = await opportunityModel.find();
-    return res.status(201).json(data);
-  } catch (error) {
-    console.log(error);
-  }
-};
+
 
 export const editStage = async (req, res) => {
   try {
-    console.log("▶️ editStage called");
-    console.log("📥 Request body:", req.body);
 
-    const { id, stage } = req.body;
+    const { id, status } = req.body;
 
-    if (!id || !stage) {
-      console.error("❌ Missing id or stage", { id, stage });
+    if (!id || !status) {
+      console.error("❌ Missing id or stage", { id, status });
       return res
         .status(400)
         .json({ message: "Missing required fields: id or stage" });
     }
 
-    const updateData = { stage };
+    const updateData = { status };
 
-    if (stage === "Close") {
+    
+
+    if (status === "Close") {
       updateData.closedAt = new Date();
-      console.log("✅ Stage is Close, setting closedAt:", updateData.closedAt);
-    } else {
-      console.log("ℹ️ Stage is not Close, closedAt not modified");
+    
+    } 
+
+const lead=await Leads.findById(id)
+   if (lead.status === "Close") {
+      return res.status(403).json({
+        message: "Closed opportunities cannot be moved to another stage",
+      });
     }
 
-    console.log("📝 Update payload:", updateData);
 
-    const updatedOpportunity = await opportunityModel.findByIdAndUpdate(
+    const updatedLead = await Leads.findByIdAndUpdate(
       id,
       updateData,
       { new: true, runValidators: true }
     );
 
-    if (!updatedOpportunity) {
-      console.error("❌ Opportunity not found for id:", id);
+    if (!updatedLead) {
       return res.status(404).json({ message: "Opportunity not found" });
     }
 
-    console.log("✅ Opportunity updated:", {
-      id: updatedOpportunity._id,
-      stage: updatedOpportunity.stage,
-      closedAt: updatedOpportunity.closedAt,
-    });
 
     return res.status(200).json({
       message: "Stage updated successfully",
-      data: updatedOpportunity,
+      data: updatedLead,
     });
   } catch (error) {
-    console.error("🔥 Error in editStage:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 };
 
 
 
-export const opportunityFilter = async (req, res) => {
-  try {
-   
-    const {
-      stage=[],
-      AssignedTo=[],
-      lead_Source=[],
-    closeDateFrom,
-    closeDateTo
-    } = req.body||{};
 
-  
-    let query = {};
-
-    if (stage.length > 0) {
-      query.stage = { $in: stage };
-    }
-
-    if (AssignedTo.length > 0) {
-      query.AssignedTo = { $in: AssignedTo };
-    }
-
-    if (lead_Source.length > 0) {
-      query.lead_Source = { $in: lead_Source };
-    }
-
-    if (closeDateFrom||closeDateTo) {
-      query.close_Date={}
-      if (closeDateFrom) {
-        
-        query.close_Date.$gte=closeDateFrom
-      }
-      if (closeDateTo) {
-        
-        query.close_Date.$lte=closeDateTo
-      }
-    }
-
-    const data = await opportunityModel.find(query);
-
-    res.status(200).json(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Filter error" });
-  }
-};
 
 
 
@@ -269,7 +147,7 @@ export const leadFilter=async(req,res)=>{
       query.Assign=Assign
     }
 
-    const data=await ContactModel.find(query)
+    const data=await Leads.find(query)
 
     return res.status(200).json(data)
 
@@ -287,8 +165,9 @@ export const leadFilter=async(req,res)=>{
 
 export const GetUser = async (req, res) => {
   try {
-    const data = await UserModel.find();
-    return res.status(201).json(data);
+    const data = await UserModel.find({role:"user"});
+    
+    return res.status(201).json(data.length);
   } catch (error) {
     console.log(error);
   }
@@ -298,103 +177,143 @@ export const GetUser = async (req, res) => {
 
 
 
+import XLSX from "xlsx";
+import https from "https";
+import { createRequire } from "module";
 
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse");
 
+/* ================= HELPER: Cloudinary URL → Buffer ================= */
+const getBufferFromUrl = (url) => {
+  return new Promise((resolve, reject) => {
+    https
+      .get(url, (res) => {
+        const chunks = [];
+        res.on("data", (chunk) => chunks.push(chunk));
+        res.on("end", () => resolve(Buffer.concat(chunks)));
+      })
+      .on("error", reject);
+  });
+};
 
-
-export const AddTasks = async (req, res) => {
+export const uploadLeads = async (req, res) => {
   try {
-    const {
-      Title,
-      DUE_DATE,
-      Due_Time,
-      Priority,
-      Assignee,
-      ContactDeal,
-      Reminder,
-      Notes
-    } = req.body;
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
 
-    let Task = await TasksModel.create({
-      Title,
-      DUE_DATE,
-      Due_Time,
-      Priority,
-      Assignee,
-      ContactDeal,
-      Reminder,
-      Notes
+    const buffer = await getBufferFromUrl(req.file.path);
+    const mimeType = req.file.mimetype;
+
+    let leads = [];
+    const insertData=[]
+    console.log("MIME:", mimeType);
+console.log("LEADS:", leads);
+
+    /* ================= EXCEL ================= */
+    if (
+      mimeType ===
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      mimeType === "application/vnd.ms-excel"
+    ) {
+      const workbook = XLSX.read(buffer, { type: "buffer" });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet);
+
+      leads = rows.map((row) => ({
+        fullname: row.fullname,
+        email: row.email,
+         phone: row.phone ? String(row.phone) : "",
+      }));
+    }
+
+    /* ================= PDF ================= */
+    if (mimeType === "application/pdf") {
+      const pdfData = await pdfParse(buffer);
+
+      // 🔥 Strong split (real PDFs ke liye)
+      const blocks = pdfData.text.split(/Name:/i);
+
+      blocks.forEach((block) => {
+        const name = block.match(/^\s*(.*)/);
+        const email = block.match(/Email:\s*(.*)/i);
+        const phone = block.match(/Phone:\s*(.*)/i);
+
+        if (name && email) {
+          leads.push({
+            fullname: name[1].trim(),
+            email: email[1].trim(),
+            phone: phone ? phone[1].trim() : "",
+          });
+        }
+      });
+    }
+
+    /* ================= DB SAVE ================= */
+    let inserted = 0;
+    let skipped = 0;
+
+    for (const lead of leads) {
+      if (!lead.fullname || !lead.email) {
+        skipped++;
+        continue;
+      }
+console.log("LEAD:", lead);
+      const exists = await Leads.findOne({ email: lead.email });
+         console.log("EXISTS:", exists);  
+      if (exists) {
+        skipped++;
+        continue;
+      }
+
+      const saved=await Leads.create({
+        fullname: lead.fullname,
+        email: lead.email,
+        phone: lead.phone,
+        status: "New Leads", // 🔥 DEFAULT STATUS
+      });
+     insertData.push(saved)
+      inserted++;
+    }
+if (insertData.length) {
+ await AutoAssign(insertData)
+}
+    return res.json({
+      message: "Leads uploaded successfully",
+      inserted,
+      skipped,
+      total: leads.length,
     });
-    return res.status(200).json({ message: "Add Successfully" });
+  } catch (error) {
+   console.error("UPLOAD ERROR FULL:", error);
+  console.error(error.stack);
+  return res.status(500).json({
+    message: "Upload failed",
+    error: error.message,
+  });
+  }
+};
+
+
+
+
+
+
+
+
+
+export const DeleteLead=async(req,res)=>{
+  try {
+    const {id}=req.body
+    if (!id) {
+      return res.status(400).json({message:"Lead Id is required"})
+    }
+    const deleteLead=await Leads.findByIdAndDelete(id)
+          return res.status(200).json({message:"Lead deleted"})
+
   } catch (error) {
     console.log(error);
+    
   }
-};
-
-
-
-
-
-
-export const FetchTasks = async (req, res) => {
-  try {
-    const data = await TasksModel.find();
-    return res.status(201).json(data);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-
-
-export const revenue = async (req, res) => {
-  try {
-    const data = await opportunityModel.aggregate([
-      {
-        $match: {
-          stage: "Close",
-          close_Date: { $ne: null },
-        },
-      },
-      {
-        $group: {
-          _id: {
-            year: { $year: { $toDate: "$close_Date" } },
-            month: { $month: { $toDate: "$close_Date" } },
-          },
-          revenue: { $sum: { $toDouble: "$rate" } },
-        },
-      },
-      {
-        $sort: {
-          "_id.year": 1,
-          "_id.month": 1,
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          year: "$_id.year",
-          monthNumber: "$_id.month",
-          month: {
-            $arrayElemAt: [
-              [
-                "", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-              ],
-              "$_id.month"
-            ]
-          },
-          revenue: 1,
-        },
-      },
-    ]);
-
-    res.status(200).json(data);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Revenue calculation failed" });
-  }
-};
-
-
+}

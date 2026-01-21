@@ -1,17 +1,18 @@
-import React from 'react'
-import Navbar from './Navbar'
-import { Outlet } from 'react-router-dom'
+import Navbar from "./Navbar";
+import { Outlet } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Layout() {
+  const { loading } = useAuth();
+
+  if (loading) return null;
 
   return (
-    <div>
-      <Navbar/>
-      <div>
-        <Outlet/>
-      </div>
-    </div>
-  )
+    <>
+      <Navbar />
+      <Outlet />
+    </>
+  );
 }
 
-export default Layout
+export default Layout;

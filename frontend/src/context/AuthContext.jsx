@@ -6,31 +6,31 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-    const checkAuth = async () => {
-      try {
-        const res = await fetch("http://localhost:3000/api/auth/me", {
-          credentials: "include",
-        });
+  const checkAuth = async () => {
+    try {
+      const res = await fetch("http://localhost:3000/api/auth/me", {
+        credentials: "include",
+      });
 
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user);
-        } else {
-          setUser(null);
-        }
-      } catch (err) {
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data.user); // must include ProfilePicture
+      } else {
         setUser(null);
-      } finally {
-        setLoading(false);
       }
-    };
-  useEffect(() => {
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     checkAuth();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, loading,checkAuth }}>
+    <AuthContext.Provider value={{ user, setUser, loading, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

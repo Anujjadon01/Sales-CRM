@@ -10,7 +10,7 @@ import google from "../assets/google2.png";
 import authImg from "../assets/LoginImg.png";
 
 function Login() {
-  const { setUser } = useAuth();
+  const { checkAuth } = useAuth();
   const navigate = useNavigate();
 
   const [show, setShow] = useState(false);
@@ -29,23 +29,27 @@ function Login() {
         credentials: "include",
         body: JSON.stringify(data),
       });
-      let result = await res.json();
 
-      if (res.ok) {
-        setUser(result.user);
-        toast.success("Login successful");
-        navigate("/dashboard");
-      } else toast.error(result.message);
-    } catch {
-      toast.error("Login failed");
+      let result = await res.json();
+    if (!res.ok) {
+    toast.error(result.message);
+  
     }
+      navigate("/dashboard");
+await checkAuth()
+    toast.success("Login successful")
+    } catch (error) {
+  console.error("LOGIN ERROR:", error);
+  toast.error("Login failed");
+}
+
   };
 
   const handleGoogle = async () => {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
 
-    let res = await fetch("http://localhost:3000/api/auth/google/auth", {
+    let res = await fetch("http://localhost:3000/api/auth/google", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -56,10 +60,13 @@ function Login() {
     });
 
     let data = await res.json();
-    if (res.ok) {
-      setUser(data.user);
-      navigate("/dashboard");
+    if (!res.ok) {
+    toast.error(res.message);
+
     }
+      navigate("/dashboard");
+await checkAuth()
+    toast.success("Login successful");
   };
 
   return (
@@ -77,7 +84,7 @@ function Login() {
               <img src={logo} className="w-8" alt="Logo" />
             </div>
             <h1 className="text-2xl font-black text-[#3B252C] tracking-tight italic">
-              Sales<span className="text-[#8F6593]">CRM</span>
+              Lead<span className="text-[#8F6593]">Flow</span>
             </h1>
           </div>
 
@@ -137,7 +144,7 @@ function Login() {
               </div>
 
               <button className="w-full h-16 rounded-2xl bg-[#8F6593] text-white font-black shadow-[0_15px_30px_-10px_rgba(143,101,147,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(143,101,147,0.6)] hover:-translate-y-1 active:scale-95 transition-all flex items-center justify-center gap-2 group">
-                Initialize Login <ArrowRight size={18} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
+                Login <ArrowRight size={18} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
 
@@ -159,7 +166,7 @@ function Login() {
             <p className="mt-8 text-center">
               <span className="text-xs font-bold text-[#3B252C]/40 uppercase tracking-widest">New operative? </span>
               <Link to="/" className="text-xs font-black text-[#8F6593] uppercase tracking-widest hover:underline decoration-2 underline-offset-4">
-                Enlist Now
+                Register Now
               </Link>
             </p>
           </div>

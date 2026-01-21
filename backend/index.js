@@ -22,6 +22,13 @@ app.use("/api/auth", authRouter);
 app.use("/api/tasks", taskRouter);
 
 const server = http.createServer(app);
+app.use((err, req, res, next) => {
+  console.error("🔥 GLOBAL ERROR:", err.message);
+
+  res.status(400).json({
+    message: err.message || "File upload error",
+  });
+});
 
 server.listen(3000, () => {
   ConDb();

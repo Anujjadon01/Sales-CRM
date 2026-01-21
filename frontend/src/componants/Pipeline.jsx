@@ -1,33 +1,66 @@
+import React, { useEffect, useRef, useState } from "react";
 import {
   ListFilter,
-  Plus,
-  Search,
-  Clock,
-  X,
-  Building2,
+  TrendingUp,
   Tag,
-  ChevronRight,
-  Wallet,
+  GripVertical,
+  Phone,
+  MoreHorizontal,
+  Mail,
+  Lock,
+  CheckCircle2
 } from "lucide-react";
-import { DndContext, useDraggable, useDroppable } from "@dnd-kit/core";
-import { useEffect, useRef, useState } from "react";
+import { 
+  DndContext, 
+  useDraggable, 
+  useDroppable,
+  useSensor,
+  useSensors,
+  PointerSensor
+} from "@dnd-kit/core";
 import { toast } from "react-toastify";
-import PipelineFilter from "./PipelineFilter";
+import { useAuth } from "../context/AuthContext";
+import LeadDetailModal from "./LeadDetail";
 
-/* ---------------- DRAGGABLE CARD ---------------- */
+// --- NEW IMPORTS FOR CELEBRATION ---
+import Confetti from "react-confetti";
+import { useWindowSize } from "react-use";
 
-function DraggableCard({ ele }) {
+// --- CUSTOM SCROLLBAR CSS ---
+const scrollbarStyle = `
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #CDCDCD;
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #8F6593;
+  }
+`;
+
+/* ---------------- DRAGGABLE CARD COMPONENT ---------------- */
+
+function DraggableCard({ ele, onCardClick }) {
+  const isClosed = ele.status === "Close";
+
   const { attributes, listeners, setNodeRef, transform, isDragging } =
     useDraggable({
       id: ele._id,
       data: ele,
+      disabled: isClosed,
     });
 
   const style = {
     transform: transform
       ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
       : undefined,
-    opacity: isDragging ? 0.4 : 1,
+    opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 100 : 1,
   };
 
@@ -37,43 +70,73 @@ function DraggableCard({ ele }) {
       style={style}
       {...listeners}
       {...attributes}
+      onClick={() => onCardClick(ele)}
       className={`
-        bg-white/80 border border-white/50 rounded-[1.25rem] p-5 cursor-grab
-        hover:shadow-lg hover:border-[var(--accent-soft)] transition-all duration-200
-        active:cursor-grabbing group ${isDragging ? "shadow-2xl scale-105" : "shadow-sm"}
+       flex-shrink-0 group relative w-full rounded-2xl p-4 flex flex-col gap-3 overflow-hidden
+       transition-all duration-200
+       ${isClosed 
+           ? "bg-[#E3E4DB]/60 border border-[#3B252C]/10 cursor-default grayscale-[0.2]" 
+           : "bg-white border border-[#CDCDCD]/40 hover:border-[#8F6593] shadow-sm hover:shadow-md cursor-pointer active:cursor-grabbing touch-none"
+       }
       `}
     >
-      <div className="flex justify-between items-start mb-3">
-        <span className="px-2 py-0.5 rounded-md bg-[var(--accent-soft)]/20 text-[10px] font-black uppercase tracking-wider text-[var(--accent-main)]">
-          {ele.lead_Source || "General"}
-        </span>
-        <div className="h-2 w-2 rounded-full bg-[var(--accent-main)] opacity-40 group-hover:animate-pulse" />
-      </div>
+      <div className={`absolute top-0 left-0 w-1 h-full transition-colors duration-300
+        ${isClosed ? "bg-[#3B252C] opacity-80" : 
+          ele.status === "New Leads" ? "bg-[#8F6593] opacity-60 group-hover:opacity-100" : 
+          "bg-[#AEA4BF] opacity-60 group-hover:opacity-100"} 
+        `} 
+      />
 
-      <h2 className="font-bold text-[var(--text-main)] leading-tight mb-1 group-hover:text-[var(--accent-main)] transition-colors">
-        {ele.opportunitie}
-      </h2>
-
-      <div className="flex items-center gap-1.5 text-sm text-[var(--text-main)]/50 mb-4">
-        <Building2 size={13} />
-        <span className="truncate">{ele.company_name}</span>
-      </div>
-
-      <div className="pt-3 border-t border-black/5 flex justify-between items-center">
-        <div className="flex items-center gap-1 font-black text-[var(--text-main)]">
-          <span className="text-[var(--accent-main)] text-xs">₹</span>
-          {Number(ele.rate).toLocaleString()}
+      <div className="flex justify-between items-start pl-2">
+        <div className="flex items-center gap-1.5">
+            <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest 
+                ${isClosed ? "bg-[#3B252C] text-white" : "bg-[#E3E4DB] text-[#3B252C]/70"}`}>
+            {ele.status || "General"}
+            </span>
+            {isClosed && <CheckCircle2 size={12} className="text-[#3B252C]" />}
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--text-main)]/40 bg-black/5 px-2 py-1 rounded-lg">
-          <Clock size={12} />
-          {ele.close_Date}
+        <div className={`transition-colors ${isClosed ? "text-[#3B252C]/40" : "text-[#CDCDCD] group-hover:text-[#8F6593]"}`}>
+            {isClosed ? <Lock size={14} /> : <GripVertical size={14} />}
         </div>
       </div>
+
+      <div className="pl-2 space-y-2">
+        <h2 className={`font-bold text-sm leading-tight break-words transition-colors
+            ${isClosed ? "text-[#3B252C]/70 line-through" : "text-[#3B252C] group-hover:text-[#8F6593]"}`}>
+            {ele.fullname}
+        </h2>
+        
+        <div className="space-y-1.5">
+            <div className={`flex items-center gap-2 text-xs 
+                ${isClosed ? "text-[#3B252C]/40" : "text-[#3B252C]/60"}`}>
+                <Mail size={11} />
+                <span className="truncate font-medium max-w-[180px]">{ele.email}</span>
+            </div>
+            <div className={`flex items-center gap-2 text-xs 
+                ${isClosed ? "text-[#3B252C]/40" : "text-[#3B252C]/60"}`}>
+                <Phone size={11} />
+                <span className="truncate font-medium">{Number(ele.phone).toLocaleString()}</span>
+            </div>
+        </div>
+      </div>
+
+      {!isClosed && (
+          <div className="pl-2 pt-2 border-t border-[#CDCDCD]/30 flex justify-between items-center mt-1">
+             <div className="flex -space-x-2">
+                 <div className="w-5 h-5 rounded-full bg-[#E3E4DB] text-[#3B252C] text-[8px] flex items-center justify-center font-bold border border-white">
+                    {ele.fullname.charAt(0)}
+                 </div>
+             </div>
+             <span className="text-[9px] font-bold text-[#CDCDCD] uppercase tracking-wider hover:text-[#8F6593]">
+                View Details
+             </span>
+          </div>
+      )}
     </div>
   );
 }
 
-/* ---------------- DROPPABLE COLUMN ---------------- */
+/* ---------------- DROPPABLE COLUMN COMPONENT ---------------- */
 
 function DroppableColumn({ stage, children, count }) {
   const { setNodeRef, isOver } = useDroppable({ id: stage });
@@ -82,146 +145,184 @@ function DroppableColumn({ stage, children, count }) {
     <div
       ref={setNodeRef}
       className={`
-        min-w-[320px] max-w-[320px] flex flex-col gap-4 p-4 rounded-[2rem] transition-all duration-300
-        ${isOver ? "bg-[var(--accent-soft)]/30 ring-2 ring-[var(--accent-main)] ring-dashed" : "bg-white/30 backdrop-blur-sm"}
+        flex-shrink-0 w-[320px] flex flex-col rounded-[2rem] transition-all duration-300
+        ${isOver ? "bg-[#8F6593]/10 ring-2 ring-[#8F6593]/30" : "bg-white/40 backdrop-blur-md border border-[#CDCDCD]/40"}
       `}
     >
-      <div className="flex items-center justify-between px-2 mb-2">
-        <div className="flex items-center gap-2">
-            <h3 className="font-black text-sm uppercase tracking-widest text-[var(--text-main)]/70">{stage}</h3>
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white/50 text-[10px] font-bold text-[var(--text-main)] border border-white">
+      <div className="flex items-center justify-between p-5 border-b border-[#CDCDCD]/20">
+        <div className="flex items-center gap-3">
+            <h3 className="font-black text-xs uppercase tracking-[0.15em] text-[#3B252C]">{stage}</h3>
+            <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[#3B252C] text-[10px] font-bold text-[#E3E4DB] shadow-md">
                 {count}
             </span>
         </div>
-        <Plus size={16} className="text-[var(--text-main)]/30 cursor-pointer hover:text-[var(--accent-main)]" />
+        <button className="text-[#CDCDCD] hover:text-[#8F6593] transition-colors">
+            <MoreHorizontal size={16} />
+        </button>
       </div>
-      
-      <div className="flex flex-col gap-3 overflow-y-auto max-h-[calc(100vh-250px)] pr-1 custom-scrollbar">
+      <div className="flex min-h-0 flex-col gap-3 p-3 overflow-y-auto overflow-x-hidden h-[calc(100vh-240px)] custom-scrollbar">
         {children}
       </div>
     </div>
   );
 }
 
-/* ---------------- MAIN ---------------- */
+/* ---------------- MAIN PIPELINE COMPONENT ---------------- */
 
 function Pipeline() {
-  const [form, setForm] = useState(false);
   const [open, setOpen] = useState(false);
+  const [selectedLead, setSelectedLead] = useState(null);
+  
+  // --- NEW STATE: Show Confetti ---
+  const [showConfetti, setShowConfetti] = useState(false);
+  const { width, height } = useWindowSize(); // Get window dimensions
+
   const btnRef = useRef(null);
-  const [search, setSearch] = useState("");
   const [oppoData, setOppoData] = useState([]);
+  const { user } = useAuth();
 
-  const [opportunities, setOpportunities] = useState({
-    opportunitie: "",
-    company_name: "",
-    rate: "",
-    close_Date: "",
-    stage: "",
-    lead_Source: "",
-    AssignedTo: "",
-    Description: "",
-  });
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5, 
+      },
+    })
+  );
 
-  // Logic remains exactly the same as requested
   const fetchOpportunity = async () => {
-    let res = await fetch("http://localhost:3000/api/tasks/fetch-opportunity");
-    res = await res.json();
-    setOppoData(res);
+    try {
+        let res = await fetch("http://localhost:3000/api/tasks/fetch-lead", {
+        credentials: "include"
+        });
+        res = await res.json();
+        setOppoData(res);
+    } catch(err) { console.error(err) }
   };
 
   useEffect(() => { fetchOpportunity(); }, []);
 
   const fetchPipelineDeals = async (filters) => {
-    let res = await fetch("http://localhost:3000/api/tasks/filter-opportunity", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(filters),
-    });
-    if (res.ok) {
-      res = await res.json();
-      setOppoData(res);
-    }
+    try {
+        let res = await fetch("http://localhost:3000/api/tasks/filter-opportunity", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(filters),
+        });
+        if (res.ok) {
+        res = await res.json();
+        setOppoData(res);
+        }
+    } catch(err) { console.error(err) }
   };
 
   const handleDragEnd = async (event) => {
     const { active, over } = event;
     if (!over) return;
+
     const card = active.data.current;
+
+    if (card.status === "Close") {
+      toast.error("Closed leads cannot be moved", {
+        theme: "colored",
+        style: { background: "#3B252C", color: "#fff" }
+      });
+      return;
+    }
+
     const newStage = over.id;
-    if (card.stage === newStage) return;
+    if (card.status === newStage) return;
+
+    // --- LOGIC FOR CELEBRATION ---
+    if (newStage === "Close") {
+        setShowConfetti(true);
+        // Stop confetti after 5 seconds
+        setTimeout(() => {
+            setShowConfetti(false);
+        }, 5000);
+        
+        // Optional: Play a sound or show a specific toast
+        toast.success("Deal Closed! 🎉", {
+            theme: "colored",
+            style: { background: "#8F6593", color: "#fff" }
+        });
+    }
 
     setOppoData((prev) =>
-      prev.map((i) => i._id === card._id ? { ...i, stage: newStage } : i)
-    );
+        prev.map((i) =>
+          i._id === card._id ? { ...i, status: newStage } : i
+        )
+      );
 
-    await fetch("http://localhost:3000/api/tasks/update-stage", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: card._id, stage: newStage }),
-    });
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setOpportunities((pre) => ({ ...pre, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    let res = await fetch("http://localhost:3000/api/tasks/add-opportunity", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(opportunities),
-    });
-    let result = await res.json();
-    if (res.ok) {
-      toast.success(result.message);
-      setForm(false);
+    try {
+      await fetch("http://localhost:3000/api/tasks/update-stage", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: card._id, status: newStage }),
+      });
+    } catch {
+      toast.error("Stage update failed");
       fetchOpportunity();
-      setOpportunities({ opportunitie: "", company_name: "", rate: "", close_Date: "", stage: "", lead_Source: "", AssignedTo: "", Description: "" });
-    } else toast.error(result.message);
+    }
   };
 
   return (
-    <div className="flex-1 lg:ml-64 p-8 bg-[var(--bg-main)] min-h-screen font-sans">
+    <div className="flex-1 lg:ml-72 min-h-screen bg-[#E3E4DB] font-sans text-[#3B252C] flex flex-col overflow-hidden relative selection:bg-[#8F6593] selection:text-white">
+      <style>{scrollbarStyle}</style>
 
-      {/* HEADER SECTION */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-10">
-        <div>
-          <h1 className="text-4xl font-extrabold text-[var(--text-main)] tracking-tight">Sales Pipeline</h1>
-          <p className="text-[var(--text-main)]/60 font-medium">Drag and drop deals to update their stage.</p>
-        </div>
-
-        <div className="flex gap-3 w-full md:w-auto">
-          <button
-            ref={btnRef}
-            onClick={() => setOpen(!open)}
-            className="flex-1 md:flex-none h-12 px-5 rounded-2xl bg-white border border-white/60 shadow-sm flex items-center justify-center gap-2 font-bold text-[var(--text-main)] hover:bg-gray-50 transition-all"
-          >
-            <ListFilter size={18} /> Filter
-          </button>
-
-          <button
-            onClick={() => setForm(true)}
-            className="group hover:-translate-y-1 flex-1 md:flex-none h-12 px-6 rounded-2xl bg-[var(--accent-main)] text-white font-bold shadow-lg shadow-[var(--accent-main)]/20 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all"
-          >
-            <Plus className="group-hover:rotate-90 transition-transform" size={20} /> New Deal
-          </button>
-        </div>
-      </div>
-
-      {/* SEARCH BAR */}
-      <div className="relative mb-10 max-w-xl">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-main)]/30" size={20} />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by opportunity or company..."
-          className="w-full h-14 rounded-2xl pl-12 pr-4 bg-white/60 backdrop-blur-md border border-white/40 shadow-sm focus:bg-white focus:ring-2 focus:ring-[var(--accent-main)] outline-none transition-all text-lg"
+      {/* --- CONFETTI COMPONENT --- */}
+      {/* It will overlay everything when showConfetti is true */}
+      {showConfetti && (
+        <Confetti
+            width={width}
+            height={height}
+            recycle={false} // Run once and stop
+            numberOfPieces={600}
+            gravity={0.15}
+            colors={['#8F6593', '#3B252C', '#AEA4BF', '#FFD700', '#FFFFFF']}
         />
+      )}
+
+      {selectedLead && (
+        <LeadDetailModal 
+            data={selectedLead} 
+            user={user} 
+            onClose={() => setSelectedLead(null)} 
+        />
+      )}
+
+      {/* Background Ambience */}
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#8F6593]/10 rounded-full mix-blend-multiply filter blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-[#AEA4BF]/20 rounded-full mix-blend-multiply filter blur-[120px] pointer-events-none"></div>
+
+      {/* HEADER */}
+      <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center px-8 py-8 md:py-10">
+        <div className="space-y-2">
+          <div className="flex items-center gap-4">
+             <div className="w-12 h-12 rounded-2xl bg-[#3B252C] flex items-center justify-center text-[#E3E4DB] shadow-xl">
+                <TrendingUp size={24} />
+             </div>
+             <div>
+                <h1 className="text-3xl font-black text-[#3B252C] tracking-tight leading-none">Pipeline</h1>
+                <p className="text-[#8F6593] font-bold text-xs uppercase tracking-widest mt-1">
+                    Manage your deals
+                </p>
+             </div>
+          </div>
+        </div>
+
+        {user.role === "admin" && (
+          <div className="flex gap-3 w-full md:w-auto mt-6 md:mt-0">
+            <button
+              ref={btnRef}
+              onClick={() => setOpen(!open)}
+              className="group h-12 px-6 rounded-xl bg-white/80 border border-[#CDCDCD] hover:border-[#8F6593] shadow-sm flex items-center justify-center gap-2 font-bold text-[#3B252C] hover:bg-white transition-all active:scale-95 backdrop-blur-sm"
+            >
+              <ListFilter size={18} className="text-[#AEA4BF] group-hover:text-[#8F6593] transition-colors" /> 
+              <span>FILTER</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {open && (
@@ -233,107 +334,33 @@ function Pipeline() {
       )}
 
       {/* KANBAN BOARD */}
-      <DndContext onDragEnd={handleDragEnd}>
-        <div className="flex gap-6 overflow-x-auto pb-8 scroll-smooth custom-scrollbar">
-          {["Discovery", "Qualified", "Proposal", "Negotiation", "Close"].map((stage) => {
-             const stageCards = oppoData.filter((ele) => ele.stage === stage);
-             return (
-                <DroppableColumn key={stage} stage={stage} count={stageCards.length}>
-                    {stageCards.map((ele) => (
-                        <DraggableCard key={ele._id} ele={ele} />
-                    ))}
-                    {stageCards.length === 0 && (
-                        <div className="flex flex-col items-center justify-center py-10 opacity-20 border-2 border-dashed border-[var(--text-main)] rounded-2xl">
-                             <Tag size={24} />
-                             <span className="text-[10px] font-bold uppercase mt-2">Empty Stage</span>
-                        </div>
-                    )}
-                </DroppableColumn>
-             );
-          })}
-        </div>
-      </DndContext>
+      <div className="relative z-10 flex-1 overflow-x-auto overflow-y-hidden px-8 pb-8 custom-scrollbar scroll-smooth">
+        <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
+            <div className="inline-flex gap-6 h-full items-start">
+            {["New Leads", "Interested", "Follow-up", "Not Reachable", "Close"].map((stage) => {
+                const stageCards = oppoData.filter((ele) => ele.status === stage);
+                return (
+                    <DroppableColumn key={stage} stage={stage} count={stageCards.length}>
+                        {stageCards.map((ele) => (
+                            <DraggableCard 
+                                key={ele._id} 
+                                ele={ele} 
+                                onCardClick={(data) => setSelectedLead(data)}
+                            />
+                        ))}
+                        {stageCards.length === 0 && (
+                            <div className="flex flex-col items-center justify-center py-16 opacity-40 border-2 border-dashed border-[#CDCDCD] rounded-2xl mx-2">
+                                <Tag size={24} className="mb-2 text-[#AEA4BF]" />
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-[#3B252C]">Empty Stage</span>
+                            </div>
+                        )}
+                    </DroppableColumn>
+                );
+            })}
+            </div>
+        </DndContext>
+      </div>
 
-      {/* REFINED MODAL */}
-      {form && (
-        <div className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-md flex items-center justify-center px-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-2xl bg-[var(--bg-main)] border border-white/20 rounded-[2.5rem] shadow-2xl p-8 scale-in-center">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <div className="p-3 bg-[var(--accent-main)] rounded-2xl text-white">
-                        <Wallet size={24} />
-                    </div>
-                    <div>
-                        <h2 className="text-2xl font-black text-[var(--text-main)]">Add Opportunity</h2>
-                        <p className="text-xs font-bold text-[var(--text-main)]/40 uppercase tracking-widest">Pipeline Management</p>
-                    </div>
-                </div>
-                <button type="button" onClick={() => setForm(false)} className="p-2 hover:bg-black/5 rounded-full transition">
-                    <X className="text-[var(--text-main)]" size={24} />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]/40 ml-1">Opportunity Name</label>
-                  <input name="opportunitie" value={opportunities.opportunitie} onChange={handleChange} placeholder="Project Alpha" className="w-full h-12 rounded-2xl bg-white border border-white/40 px-4 focus:ring-2 focus:ring-[var(--accent-main)] outline-none transition-all" />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]/40 ml-1">Company</label>
-                  <input name="company_name" value={opportunities.company_name} onChange={handleChange} placeholder="Acme Corp" className="w-full h-12 rounded-2xl bg-white border border-white/40 px-4 focus:ring-2 focus:ring-[var(--accent-main)] outline-none transition-all" />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]/40 ml-1">Value (₹)</label>
-                  <input name="rate" value={opportunities.rate} onChange={handleChange} placeholder="50,000" className="w-full h-12 rounded-2xl bg-white border border-white/40 px-4 focus:ring-2 focus:ring-[var(--accent-main)] outline-none transition-all" />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]/40 ml-1">Target Close Date</label>
-                  <input type="date" name="close_Date" value={opportunities.close_Date} onChange={handleChange} className="w-full h-12 rounded-2xl bg-white border border-white/40 px-4 focus:ring-2 focus:ring-[var(--accent-main)] outline-none transition-all" />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]/40 ml-1">Pipeline Stage</label>
-                  <select name="stage" value={opportunities.stage} onChange={handleChange} className="w-full h-12 rounded-2xl bg-white border border-white/40 px-4 outline-none focus:ring-2 focus:ring-[var(--accent-main)]">
-                    <option value="">Select Stage</option>
-                    <option>Discovery</option>
-                    <option>Qualified</option>
-                    <option>Proposal</option>
-                    <option>Negotiation</option>
-                    <option>Close</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]/40 ml-1">Lead Source</label>
-                  <select name="lead_Source" value={opportunities.lead_Source} onChange={handleChange} className="w-full h-12 rounded-2xl bg-white border border-white/40 px-4 outline-none focus:ring-2 focus:ring-[var(--accent-main)]">
-                    <option value="">Select Source</option>
-                    <option>Website</option>
-                    <option>Referral</option>
-                    <option>LinkedIn</option>
-                    <option>Cold Call</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-black uppercase tracking-widest text-[var(--text-main)]/40 ml-1">Notes / Description</label>
-                <textarea name="Description" value={opportunities.Description} onChange={handleChange} placeholder="Key requirements..." className="w-full h-24 rounded-2xl bg-white border border-white/40 p-4 focus:ring-2 focus:ring-[var(--accent-main)] outline-none transition-all resize-none" />
-              </div>
-
-              <div className="flex justify-end gap-3">
-                <button type="button" onClick={() => setForm(false)} className="h-12 px-6 rounded-2xl font-bold text-[var(--text-main)]/60 hover:bg-black/5 transition-all">Cancel</button>
-                <button type="submit" className="h-12 px-8 rounded-2xl bg-[var(--accent-main)] text-white font-bold shadow-lg shadow-[var(--accent-main)]/20 hover:scale-[1.02] active:scale-95 transition-all">Save Opportunity</button>
-              </div>
-
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

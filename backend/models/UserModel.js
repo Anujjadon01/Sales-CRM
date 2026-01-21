@@ -29,6 +29,12 @@ const userSchema = new mongoose.Schema(
     ProfilePicture: {
       type: String,
       default:"https://cdn-icons-png.flaticon.com/512/149/149071.png"
+    },
+    role:{
+      type:String,
+      enum:["admin","user"],
+      default:"user",
+      required:true
     }
   },
   { timestamps: true }
