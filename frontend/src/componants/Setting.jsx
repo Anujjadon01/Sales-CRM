@@ -14,6 +14,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function Setting() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ function Setting() {
 
   const handleLogout = async () => {
     try {
-      await fetch("http://localhost:3000/api/auth/logout", {
+      await fetch(`${API_URL}/api/auth/logout`, {
         method: "POST",
         credentials: "include",
       });
@@ -56,7 +57,7 @@ function Setting() {
   const updateProfileInfo = async () => {
     try {
       setUpdateProfile(true);
-      let res = await fetch("http://localhost:3000/api/auth/update-profile", {
+      let res = await fetch(`${API_URL}/api/auth/update-profile`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -82,7 +83,7 @@ function Setting() {
       setImgLoading(true);
 
       let res = await fetch(
-        "http://localhost:3000/api/auth/update-profile-picture",
+        `${API_URL}/api/auth/update-profile-picture`,
         {
           method: "PUT",
           credentials: "include",

@@ -17,6 +17,7 @@ import { useAuth } from "../context/AuthContext";
 import ContactFilter from "./ContactFilter";
 import LeadDetailModal from "./LeadDetail";
 // import LeadDetailModal from "./LeadDetailModal"; // Import the modal
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function Contact() {
   const [isForm, setIsForm] = useState(false);
@@ -41,7 +42,7 @@ function Contact() {
 
   const fetchLead = async () => {
     try {
-      let res = await fetch("http://localhost:3000/api/tasks/fetch-lead", { credentials: "include" });
+      let res = await fetch(`${API_URL}/api/tasks/fetch-lead`, { credentials: "include" });
       let data = await res.json();
       setLeadData(data);
     } catch (err) { console.error("Fetch failed"); }
@@ -54,7 +55,7 @@ function Contact() {
     if(!window.confirm("Are you sure you want to delete this contact permanently?")) return;
 
     try {
-        let res = await fetch("http://localhost:3000/api/tasks/delete-task", { // Check your backend route for deleting
+        let res = await fetch(`${API_URL}/api/tasks/delete-task`, { // Check your backend route for deleting
             method: "DELETE", // Or POST depending on your API
             headers: { "Content-Type": "application/json" },
             credentials: "include",
@@ -80,7 +81,7 @@ function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let res = await fetch("http://localhost:3000/api/tasks/contact-lead", {
+    let res = await fetch(`${API_URL}/api/tasks/contact-lead`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -99,7 +100,7 @@ function Contact() {
     formData.append("leadsFile", file);
     try {
       setUploading(true);
-      const res = await fetch("http://localhost:3000/api/tasks/upload-leads", {
+      const res = await fetch(`${API_URL}/api/tasks/upload-leads`, {
         method: "POST",
         body: formData,
         credentials: "include",

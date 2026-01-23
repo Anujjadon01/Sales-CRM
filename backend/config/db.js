@@ -1,15 +1,17 @@
-import mongoose from "mongoose"
-import { configDotenv } from "dotenv";
+import mongoose from "mongoose";
 
-configDotenv()
-
-const ConDb=async()=>{
-    try {
-        await mongoose.connect(process.env.MONGO_DB)
-    } catch (error) {
-        console.log(error);
-        
+const ConDb = async () => {
+  try {
+    if (!process.env.MONGO_URI) {
+      throw new Error("MONGO_URI is missing");
     }
-}
 
-export default ConDb
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ MongoDB connected");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error.message);
+    process.exit(1);
+  }
+};
+
+export default ConDb;

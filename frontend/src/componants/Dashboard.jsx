@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import CallOverviewChart from './CallOverView';
+import CallOverviewChart from './CallOverview';
+
 import { 
   Users, 
   Phone, 
@@ -12,6 +13,7 @@ import {
   XCircle,
   HelpCircle
 } from 'lucide-react';
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const DashboardContent = () => {
   const [activeUser, setActiveUser] = useState(0); // Assuming this returns a number
@@ -25,7 +27,7 @@ const DashboardContent = () => {
 
   const fetchUsers = async () => {
     try {
-      let res = await fetch("http://localhost:3000/api/tasks/get-users");
+      let res = await fetch(`${API_URL}/api/tasks/get-users`);
       res = await res.json();
       // Assuming API returns array or count. If array: res.length
       setActiveUser(res); 
@@ -36,7 +38,7 @@ const DashboardContent = () => {
 
   const fetchLeadsStatus = async () => {
     try {
-      let res = await fetch("http://localhost:3000/api/tasks/get-leads-status");
+      let res = await fetch(`${API_URL}/api/tasks/get-leads-status`);
       res = await res.json();
       setLeadStatus(res);
     } catch (error) {

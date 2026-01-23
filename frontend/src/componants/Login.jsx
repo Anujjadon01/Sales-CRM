@@ -8,6 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png";
 import google from "../assets/google2.png";
 import authImg from "../assets/LoginImg.png";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function Login() {
   const { checkAuth } = useAuth();
@@ -23,7 +24,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let res = await fetch("http://localhost:3000/api/auth/login", {
+      let res = await fetch(`${API_URL}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -49,7 +50,7 @@ await checkAuth()
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
 
-    let res = await fetch("http://localhost:3000/api/auth/google", {
+    let res = await fetch(`${API_URL}/api/auth/google`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

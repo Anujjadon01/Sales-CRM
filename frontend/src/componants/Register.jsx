@@ -9,6 +9,7 @@ import logo from "../assets/logo.png";
 import google from "../assets/google2.png";
 
 import authImg from "../assets/RightSide.png";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function Register() {
   const { setUser } = useAuth();
@@ -28,7 +29,7 @@ function Register() {
   // Logic remains unchanged
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let res = await fetch("http://localhost:3000/api/auth/register", {
+    let res = await fetch(`${API_URL}/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -47,7 +48,7 @@ function Register() {
     const provider = new GoogleAuthProvider();
     const result = await signInWithPopup(auth, provider);
 
-    let res = await fetch("http://localhost:3000/api/auth/google/auth", {
+    let res = await fetch(`${API_URL}/api/auth/google/auth`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

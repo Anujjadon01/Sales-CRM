@@ -25,6 +25,7 @@ import LeadDetailModal from "./LeadDetail";
 // --- NEW IMPORTS FOR CELEBRATION ---
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 // --- CUSTOM SCROLLBAR CSS ---
 const scrollbarStyle = `
@@ -191,7 +192,7 @@ function Pipeline() {
 
   const fetchOpportunity = async () => {
     try {
-        let res = await fetch("http://localhost:3000/api/tasks/fetch-lead", {
+        let res = await fetch(`${API_URL}/api/tasks/fetch-lead`, {
         credentials: "include"
         });
         res = await res.json();
@@ -203,7 +204,7 @@ function Pipeline() {
 
   const fetchPipelineDeals = async (filters) => {
     try {
-        let res = await fetch("http://localhost:3000/api/tasks/filter-opportunity", {
+        let res = await fetch(`${API_URL}/api/tasks/filter-opportunity`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -255,7 +256,7 @@ function Pipeline() {
       );
 
     try {
-      await fetch("http://localhost:3000/api/tasks/update-stage", {
+      await fetch(`${API_URL}/api/tasks/update-stage`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: card._id, status: newStage }),

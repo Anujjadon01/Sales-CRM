@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { ArrowRight, Users, Zap, BarChart, ShieldCheck, TrendingUp, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 const Home = () => {
   const { user} = useAuth();
@@ -14,7 +15,7 @@ let data=lead.filter((ele)=>ele.status=="Interested")
 
    const fetchLead = async () => {
       try {
-        let res = await fetch("http://localhost:3000/api/tasks/fetch-lead", { credentials: "include" });
+let res = await fetch(`${API_URL}/api/tasks/fetch-lead`, { credentials: "include" });
         let data = await res.json();
         setLead(data);
         
