@@ -9,6 +9,8 @@ const sendUser = (user) => ({
   email: user.email,
 });
 
+
+
 /* ================= REGISTER ================= */
 export const Register = async (req, res) => {
   try {
@@ -41,7 +43,7 @@ export const Register = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -54,6 +56,7 @@ export const Register = async (req, res) => {
 
 /* ================= LOGIN ================= */
 export const Login = async (req, res) => {
+
   try {
     const { email, password } = req.body;
 
@@ -73,14 +76,15 @@ export const Login = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({ user: sendUser(user) });
   } catch (err) {
-    return res.status(500).json({ message: "Login failed" });
+     console.error("🔥 LOGIN ERROR:", err);
+  return res.status(500).json({ message: "Login failed" });
   }
 };
 
@@ -104,14 +108,14 @@ export const GoogleLogin = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({ user: sendUser(user) });
   } catch (err) {
-    return res.status(500).json({ message: "Google login failed" });
+    return res.status(500).json(err);
   }
 };
 
@@ -120,7 +124,7 @@ export const Logout = async (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
     path: "/",
   });
 

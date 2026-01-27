@@ -8,32 +8,45 @@ import taskRouter from "./routes/task.router.js";
 
 const app = express();
 
+/* ---------------- MIDDLEWARE ---------------- */
 app.use(express.json());
-app.use(cookieParser()); // 🔥 REQUIRED
+app.use(cookieParser());
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || true,
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
   })
 );
 
+/* ---------------- ROUTES ---------------- */
 app.use("/api/auth", authRouter);
 app.use("/api/tasks", taskRouter);
 
-const server = http.createServer(app);
+/* ---------------- ERROR HANDLER ---------------- */
 app.use((err, req, res, next) => {
-  console.error("🔥 GLOBAL ERROR:", err.message);
+  console.error("🔥 GLOBAL ERROR:", err);
 
   res.status(400).json({
-    message: err.message || "File upload error",
+    message: err.message || "Something went wrong",
   });
 });
 
+/* ---------------- SERVER ---------------- */
 const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => {
-  ConDb();
-  console.log(`Server running on port ${PORT}`);
-});
+const server = http.createServer(app);
+
+(async () => {
+  try {
+    await ConDb();
+    server.listen(PORT, "0.0.0.0", () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error("❌ Failed to start server:", err.message);
+    process.exit(1);
+  }
+})();
+
 
