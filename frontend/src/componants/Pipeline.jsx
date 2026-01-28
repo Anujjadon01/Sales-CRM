@@ -21,10 +21,12 @@ import {
 import { toast } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 import LeadDetailModal from "./LeadDetail";
+// import PipelineFilter from "./PipelineFilter"; // Ensure this is imported
 
 // --- NEW IMPORTS FOR CELEBRATION ---
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 // --- CUSTOM SCROLLBAR CSS ---
@@ -76,22 +78,22 @@ function DraggableCard({ ele, onCardClick }) {
        flex-shrink-0 group relative w-full rounded-2xl p-4 flex flex-col gap-3 overflow-hidden
        transition-all duration-200
        ${isClosed 
-           ? "bg-[#E3E4DB]/60 border border-[#3B252C]/10 cursor-default grayscale-[0.2]" 
-           : "bg-white border border-[#CDCDCD]/40 hover:border-[#8F6593] shadow-sm hover:shadow-md cursor-pointer active:cursor-grabbing touch-none"
+            ? "bg-white/40 border border-[#3B252C]/10 cursor-default grayscale-[0.2]" 
+            : "bg-white border border-[#CDCDCD]/40 hover:border-[#8F6593] shadow-sm hover:shadow-md cursor-pointer active:cursor-grabbing touch-none"
        }
       `}
     >
       <div className={`absolute top-0 left-0 w-1 h-full transition-colors duration-300
-        ${isClosed ? "bg-[#3B252C] opacity-80" : 
-          ele.status === "New Leads" ? "bg-[#8F6593] opacity-60 group-hover:opacity-100" : 
-          "bg-[#AEA4BF] opacity-60 group-hover:opacity-100"} 
-        `} 
+         ${isClosed ? "bg-[#3B252C] opacity-80" : 
+           ele.status === "New Leads" ? "bg-[#8F6593] opacity-60 group-hover:opacity-100" : 
+           "bg-[#AEA4BF] opacity-60 group-hover:opacity-100"} 
+         `} 
       />
 
       <div className="flex justify-between items-start pl-2">
         <div className="flex items-center gap-1.5">
             <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest 
-                ${isClosed ? "bg-[#3B252C] text-white" : "bg-[#E3E4DB] text-[#3B252C]/70"}`}>
+                ${isClosed ? "bg-[#3B252C] text-white" : "bg-black/5 text-[#3B252C]/70"}`}>
             {ele.status || "General"}
             </span>
             {isClosed && <CheckCircle2 size={12} className="text-[#3B252C]" />}
@@ -124,7 +126,7 @@ function DraggableCard({ ele, onCardClick }) {
       {!isClosed && (
           <div className="pl-2 pt-2 border-t border-[#CDCDCD]/30 flex justify-between items-center mt-1">
              <div className="flex -space-x-2">
-                 <div className="w-5 h-5 rounded-full bg-[#E3E4DB] text-[#3B252C] text-[8px] flex items-center justify-center font-bold border border-white">
+                 <div className="w-5 h-5 rounded-full bg-[#8F6593] text-white text-[8px] flex items-center justify-center font-bold border border-white">
                     {ele.fullname.charAt(0)}
                  </div>
              </div>
@@ -147,17 +149,17 @@ function DroppableColumn({ stage, children, count }) {
       ref={setNodeRef}
       className={`
         flex-shrink-0 w-[320px] flex flex-col rounded-[2rem] transition-all duration-300
-        ${isOver ? "bg-[#8F6593]/10 ring-2 ring-[#8F6593]/30" : "bg-white/40 backdrop-blur-md border border-[#CDCDCD]/40"}
+        ${isOver ? "bg-[#8F6593]/20 ring-2 ring-[#8F6593]/30" : "bg-white/30 backdrop-blur-md border border-white/40"}
       `}
     >
-      <div className="flex items-center justify-between p-5 border-b border-[#CDCDCD]/20">
+      <div className="flex items-center justify-between p-5 border-b border-black/5">
         <div className="flex items-center gap-3">
             <h3 className="font-black text-xs uppercase tracking-[0.15em] text-[#3B252C]">{stage}</h3>
-            <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[#3B252C] text-[10px] font-bold text-[#E3E4DB] shadow-md">
+            <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[#3B252C] text-[10px] font-bold text-white shadow-md">
                 {count}
             </span>
         </div>
-        <button className="text-[#CDCDCD] hover:text-[#8F6593] transition-colors">
+        <button className="text-[#3B252C]/30 hover:text-[#8F6593] transition-colors">
             <MoreHorizontal size={16} />
         </button>
       </div>
@@ -173,10 +175,8 @@ function DroppableColumn({ stage, children, count }) {
 function Pipeline() {
   const [open, setOpen] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
-  
-  // --- NEW STATE: Show Confetti ---
   const [showConfetti, setShowConfetti] = useState(false);
-  const { width, height } = useWindowSize(); // Get window dimensions
+  const { width, height } = useWindowSize();
 
   const btnRef = useRef(null);
   const [oppoData, setOppoData] = useState([]);
@@ -192,9 +192,7 @@ function Pipeline() {
 
   const fetchOpportunity = async () => {
     try {
-        let res = await fetch(`${API_URL}/api/tasks/fetch-lead`, {
-        credentials: "include"
-        });
+        let res = await fetch(`${API_URL}/api/tasks/fetch-lead`, { credentials: "include" });
         res = await res.json();
         setOppoData(res);
     } catch(err) { console.error(err) }
@@ -234,15 +232,9 @@ function Pipeline() {
     const newStage = over.id;
     if (card.status === newStage) return;
 
-    // --- LOGIC FOR CELEBRATION ---
     if (newStage === "Close") {
         setShowConfetti(true);
-        // Stop confetti after 5 seconds
-        setTimeout(() => {
-            setShowConfetti(false);
-        }, 5000);
-        
-        // Optional: Play a sound or show a specific toast
+        setTimeout(() => setShowConfetti(false), 5000);
         toast.success("Deal Closed! 🎉", {
             theme: "colored",
             style: { background: "#8F6593", color: "#fff" }
@@ -268,16 +260,14 @@ function Pipeline() {
   };
 
   return (
-    <div className="flex-1 lg:ml-72 min-h-screen bg-[#E3E4DB] font-sans text-[#3B252C] flex flex-col overflow-hidden relative selection:bg-[#8F6593] selection:text-white">
+    <div className="flex-1 lg:ml-72 min-h-screen bg-[var(--color-crm-bg)] font-sans text-[#3B252C] flex flex-col overflow-hidden relative selection:bg-[#8F6593] selection:text-white transition-colors duration-500">
       <style>{scrollbarStyle}</style>
 
-      {/* --- CONFETTI COMPONENT --- */}
-      {/* It will overlay everything when showConfetti is true */}
       {showConfetti && (
         <Confetti
             width={width}
             height={height}
-            recycle={false} // Run once and stop
+            recycle={false}
             numberOfPieces={600}
             gravity={0.15}
             colors={['#8F6593', '#3B252C', '#AEA4BF', '#FFD700', '#FFFFFF']}
@@ -300,7 +290,7 @@ function Pipeline() {
       <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center px-8 py-8 md:py-10">
         <div className="space-y-2">
           <div className="flex items-center gap-4">
-             <div className="w-12 h-12 rounded-2xl bg-[#3B252C] flex items-center justify-center text-[#E3E4DB] shadow-xl">
+             <div className="w-12 h-12 rounded-2xl bg-[#3B252C] flex items-center justify-center text-white shadow-xl">
                 <TrendingUp size={24} />
              </div>
              <div>
@@ -317,7 +307,7 @@ function Pipeline() {
             <button
               ref={btnRef}
               onClick={() => setOpen(!open)}
-              className="group h-12 px-6 rounded-xl bg-white/80 border border-[#CDCDCD] hover:border-[#8F6593] shadow-sm flex items-center justify-center gap-2 font-bold text-[#3B252C] hover:bg-white transition-all active:scale-95 backdrop-blur-sm"
+              className="group h-12 px-6 rounded-xl bg-white/60 border border-white/40 hover:border-[#8F6593] shadow-sm flex items-center justify-center gap-2 font-bold text-[#3B252C] hover:bg-white transition-all active:scale-95 backdrop-blur-sm"
             >
               <ListFilter size={18} className="text-[#AEA4BF] group-hover:text-[#8F6593] transition-colors" /> 
               <span>FILTER</span>
@@ -350,7 +340,7 @@ function Pipeline() {
                             />
                         ))}
                         {stageCards.length === 0 && (
-                            <div className="flex flex-col items-center justify-center py-16 opacity-40 border-2 border-dashed border-[#CDCDCD] rounded-2xl mx-2">
+                            <div className="flex flex-col items-center justify-center py-16 opacity-30 border-2 border-dashed border-[#3B252C]/20 rounded-2xl mx-2">
                                 <Tag size={24} className="mb-2 text-[#AEA4BF]" />
                                 <span className="text-[10px] font-bold uppercase tracking-widest text-[#3B252C]">Empty Stage</span>
                             </div>
@@ -361,7 +351,6 @@ function Pipeline() {
             </div>
         </DndContext>
       </div>
-
     </div>
   );
 }

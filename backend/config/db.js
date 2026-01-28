@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+console.log("Current URI:", process.env.MONGO_URI);
 const ConDb = async () => {
   try {
     if (!process.env.MONGO_URI) {

@@ -1,11 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --bg-main: #E3E4DB;
-  --bg-muted: #CDCDCD;
-  --accent-soft: #AEA4BF;
-  --accent-main: #8F6593;
-  --text-main: #3B252C;
+  /* Brand Color Palette */
+  --color-brand-white: #FFFFFF;
+  --color-brand-dark: #3B413C;
+  --color-brand-sage: #9DB5B2;
+  --color-brand-mist: #DAF0EE;
+  --color-brand-mint: #94D1BE;
+
+  /* Optional: Semantic Aliases */
+  --color-crm-bg: var(--color-brand-mist);
+  --color-crm-text: var(--color-brand-dark);
+  --color-crm-accent: var(--color-brand-mint);
 }
 
 /* LABEL */
