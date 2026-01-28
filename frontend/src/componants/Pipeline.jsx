@@ -10,9 +10,9 @@ import {
   Lock,
   CheckCircle2
 } from "lucide-react";
-import { 
-  DndContext, 
-  useDraggable, 
+import {
+  DndContext,
+  useDraggable,
   useDroppable,
   useSensor,
   useSensors,
@@ -77,63 +77,63 @@ function DraggableCard({ ele, onCardClick }) {
       className={`
        flex-shrink-0 group relative w-full rounded-2xl p-4 flex flex-col gap-3 overflow-hidden
        transition-all duration-200
-       ${isClosed 
-            ? "bg-white/40 border border-[#3B252C]/10 cursor-default grayscale-[0.2]" 
-            : "bg-white border border-[#CDCDCD]/40 hover:border-[#8F6593] shadow-sm hover:shadow-md cursor-pointer active:cursor-grabbing touch-none"
-       }
+       ${isClosed
+          ? "bg-white/40 border border-[#3B252C]/10 cursor-default grayscale-[0.2]"
+          : "bg-white border border-[#CDCDCD]/40 hover:border-[#8F6593] shadow-sm hover:shadow-md cursor-pointer active:cursor-grabbing touch-none"
+        }
       `}
     >
       <div className={`absolute top-0 left-0 w-1 h-full transition-colors duration-300
-         ${isClosed ? "bg-[#3B252C] opacity-80" : 
-           ele.status === "New Leads" ? "bg-[#8F6593] opacity-60 group-hover:opacity-100" : 
-           "bg-[#AEA4BF] opacity-60 group-hover:opacity-100"} 
-         `} 
+         ${isClosed ? "bg-[#3B252C] opacity-80" :
+          ele.status === "New Leads" ? "bg-[#8F6593] opacity-60 group-hover:opacity-100" :
+            "bg-[#AEA4BF] opacity-60 group-hover:opacity-100"} 
+         `}
       />
 
       <div className="flex justify-between items-start pl-2">
         <div className="flex items-center gap-1.5">
-            <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest 
+          <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest 
                 ${isClosed ? "bg-[#3B252C] text-white" : "bg-black/5 text-[#3B252C]/70"}`}>
             {ele.status || "General"}
-            </span>
-            {isClosed && <CheckCircle2 size={12} className="text-[#3B252C]" />}
+          </span>
+          {isClosed && <CheckCircle2 size={12} className="text-[#3B252C]" />}
         </div>
         <div className={`transition-colors ${isClosed ? "text-[#3B252C]/40" : "text-[#CDCDCD] group-hover:text-[#8F6593]"}`}>
-            {isClosed ? <Lock size={14} /> : <GripVertical size={14} />}
+          {isClosed ? <Lock size={14} /> : <GripVertical size={14} />}
         </div>
       </div>
 
       <div className="pl-2 space-y-2">
         <h2 className={`font-bold text-sm leading-tight break-words transition-colors
             ${isClosed ? "text-[#3B252C]/70 line-through" : "text-[#3B252C] group-hover:text-[#8F6593]"}`}>
-            {ele.fullname}
+          {ele.fullname}
         </h2>
-        
+
         <div className="space-y-1.5">
-            <div className={`flex items-center gap-2 text-xs 
+          <div className={`flex items-center gap-2 text-xs 
                 ${isClosed ? "text-[#3B252C]/40" : "text-[#3B252C]/60"}`}>
-                <Mail size={11} />
-                <span className="truncate font-medium max-w-[180px]">{ele.email}</span>
-            </div>
-            <div className={`flex items-center gap-2 text-xs 
+            <Mail size={11} />
+            <span className="truncate font-medium max-w-[180px]">{ele.email}</span>
+          </div>
+          <div className={`flex items-center gap-2 text-xs 
                 ${isClosed ? "text-[#3B252C]/40" : "text-[#3B252C]/60"}`}>
-                <Phone size={11} />
-                <span className="truncate font-medium">{Number(ele.phone).toLocaleString()}</span>
-            </div>
+            <Phone size={11} />
+            <span className="truncate font-medium">{Number(ele.phone).toLocaleString()}</span>
+          </div>
         </div>
       </div>
 
       {!isClosed && (
-          <div className="pl-2 pt-2 border-t border-[#CDCDCD]/30 flex justify-between items-center mt-1">
-             <div className="flex -space-x-2">
-                 <div className="w-5 h-5 rounded-full bg-[#8F6593] text-white text-[8px] flex items-center justify-center font-bold border border-white">
-                    {ele.fullname.charAt(0)}
-                 </div>
-             </div>
-             <span className="text-[9px] font-bold text-[#CDCDCD] uppercase tracking-wider hover:text-[#8F6593]">
-                View Details
-             </span>
+        <div className="pl-2 pt-2 border-t border-[#CDCDCD]/30 flex justify-between items-center mt-1">
+          <div className="flex -space-x-2">
+            <div className="w-5 h-5 rounded-full bg-[#8F6593] text-white text-[8px] flex items-center justify-center font-bold border border-white">
+              {ele.fullname.charAt(0)}
+            </div>
           </div>
+          <span className="text-[9px] font-bold text-[#CDCDCD] uppercase tracking-wider hover:text-[#8F6593]">
+            View Details
+          </span>
+        </div>
       )}
     </div>
   );
@@ -154,13 +154,13 @@ function DroppableColumn({ stage, children, count }) {
     >
       <div className="flex items-center justify-between p-5 border-b border-black/5">
         <div className="flex items-center gap-3">
-            <h3 className="font-black text-xs uppercase tracking-[0.15em] text-[#3B252C]">{stage}</h3>
-            <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[#3B252C] text-[10px] font-bold text-white shadow-md">
-                {count}
-            </span>
+          <h3 className="font-black text-xs uppercase tracking-[0.15em] text-[#3B252C]">{stage}</h3>
+          <span className="flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-[#3B252C] text-[10px] font-bold text-white shadow-md">
+            {count}
+          </span>
         </div>
         <button className="text-[#3B252C]/30 hover:text-[#8F6593] transition-colors">
-            <MoreHorizontal size={16} />
+          <MoreHorizontal size={16} />
         </button>
       </div>
       <div className="flex min-h-0 flex-col gap-3 p-3 overflow-y-auto overflow-x-hidden h-[calc(100vh-240px)] custom-scrollbar">
@@ -185,34 +185,34 @@ function Pipeline() {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 5, 
+        distance: 5,
       },
     })
   );
 
   const fetchOpportunity = async () => {
     try {
-        let res = await fetch(`${API_URL}/api/tasks/fetch-lead`, { credentials: "include" });
-        res = await res.json();
-        setOppoData(res);
-    } catch(err) { console.error(err) }
+      let res = await fetch(`${API_URL}/api/tasks/fetch-lead`, { credentials: "include" });
+      res = await res.json();
+      setOppoData(res);
+    } catch (err) { console.error(err) }
   };
 
   useEffect(() => { fetchOpportunity(); }, []);
 
   const fetchPipelineDeals = async (filters) => {
     try {
-        let res = await fetch(`${API_URL}/api/tasks/filter-opportunity`, {
+      let res = await fetch(`${API_URL}/api/tasks/filter-opportunity`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify(filters),
-        });
-        if (res.ok) {
+      });
+      if (res.ok) {
         res = await res.json();
         setOppoData(res);
-        }
-    } catch(err) { console.error(err) }
+      }
+    } catch (err) { console.error(err) }
   };
 
   const handleDragEnd = async (event) => {
@@ -233,19 +233,19 @@ function Pipeline() {
     if (card.status === newStage) return;
 
     if (newStage === "Close") {
-        setShowConfetti(true);
-        setTimeout(() => setShowConfetti(false), 5000);
-        toast.success("Deal Closed! 🎉", {
-            theme: "colored",
-            style: { background: "#8F6593", color: "#fff" }
-        });
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000);
+      toast.success("Deal Closed! 🎉", {
+        theme: "colored",
+        style: { background: "#8F6593", color: "#fff" }
+      });
     }
 
     setOppoData((prev) =>
-        prev.map((i) =>
-          i._id === card._id ? { ...i, status: newStage } : i
-        )
-      );
+      prev.map((i) =>
+        i._id === card._id ? { ...i, status: newStage } : i
+      )
+    );
 
     try {
       await fetch(`${API_URL}/api/tasks/update-stage`, {
@@ -265,20 +265,20 @@ function Pipeline() {
 
       {showConfetti && (
         <Confetti
-            width={width}
-            height={height}
-            recycle={false}
-            numberOfPieces={600}
-            gravity={0.15}
-            colors={['#8F6593', '#3B252C', '#AEA4BF', '#FFD700', '#FFFFFF']}
+          width={width}
+          height={height}
+          recycle={false}
+          numberOfPieces={600}
+          gravity={0.15}
+          colors={['#8F6593', '#3B252C', '#AEA4BF', '#FFD700', '#FFFFFF']}
         />
       )}
 
       {selectedLead && (
-        <LeadDetailModal 
-            data={selectedLead} 
-            user={user} 
-            onClose={() => setSelectedLead(null)} 
+        <LeadDetailModal
+          data={selectedLead}
+          user={user}
+          onClose={() => setSelectedLead(null)}
         />
       )}
 
@@ -290,15 +290,15 @@ function Pipeline() {
       <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center px-8 py-8 md:py-10">
         <div className="space-y-2">
           <div className="flex items-center gap-4">
-             <div className="w-12 h-12 rounded-2xl bg-[#3B252C] flex items-center justify-center text-white shadow-xl">
-                <TrendingUp size={24} />
-             </div>
-             <div>
-                <h1 className="text-3xl font-black text-[#3B252C] tracking-tight leading-none">Pipeline</h1>
-                <p className="text-[#8F6593] font-bold text-xs uppercase tracking-widest mt-1">
-                    Manage your deals
-                </p>
-             </div>
+            <div className="w-12 h-12 rounded-2xl bg-[#3B252C] flex items-center justify-center text-white shadow-xl">
+              <TrendingUp size={24} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-[#3B252C] tracking-tight leading-none">Pipeline</h1>
+              <p className="text-[#8F6593] font-bold text-xs uppercase tracking-widest mt-1">
+                Manage your deals
+              </p>
+            </div>
           </div>
         </div>
 
@@ -309,7 +309,7 @@ function Pipeline() {
               onClick={() => setOpen(!open)}
               className="group h-12 px-6 rounded-xl bg-white/60 border border-white/40 hover:border-[#8F6593] shadow-sm flex items-center justify-center gap-2 font-bold text-[#3B252C] hover:bg-white transition-all active:scale-95 backdrop-blur-sm"
             >
-              <ListFilter size={18} className="text-[#AEA4BF] group-hover:text-[#8F6593] transition-colors" /> 
+              <ListFilter size={18} className="text-[#AEA4BF] group-hover:text-[#8F6593] transition-colors" />
               <span>FILTER</span>
             </button>
           </div>
@@ -327,28 +327,28 @@ function Pipeline() {
       {/* KANBAN BOARD */}
       <div className="relative z-10 flex-1 overflow-x-auto overflow-y-hidden px-8 pb-8 custom-scrollbar scroll-smooth">
         <DndContext onDragEnd={handleDragEnd} sensors={sensors}>
-            <div className="inline-flex gap-6 h-full items-start">
+          <div className="inline-flex gap-6 h-full items-start">
             {["New Leads", "Interested", "Follow-up", "Not Reachable", "Close"].map((stage) => {
-                const stageCards = oppoData.filter((ele) => ele.status === stage);
-                return (
-                    <DroppableColumn key={stage} stage={stage} count={stageCards.length}>
-                        {stageCards.map((ele) => (
-                            <DraggableCard 
-                                key={ele._id} 
-                                ele={ele} 
-                                onCardClick={(data) => setSelectedLead(data)}
-                            />
-                        ))}
-                        {stageCards.length === 0 && (
-                            <div className="flex flex-col items-center justify-center py-16 opacity-30 border-2 border-dashed border-[#3B252C]/20 rounded-2xl mx-2">
-                                <Tag size={24} className="mb-2 text-[#AEA4BF]" />
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-[#3B252C]">Empty Stage</span>
-                            </div>
-                        )}
-                    </DroppableColumn>
-                );
+              const stageCards = oppoData.filter((ele) => ele.status === stage);
+              return (
+                <DroppableColumn key={stage} stage={stage} count={stageCards.length}>
+                  {stageCards.map((ele) => (
+                    <DraggableCard
+                      key={ele._id}
+                      ele={ele}
+                      onCardClick={(data) => setSelectedLead(data)}
+                    />
+                  ))}
+                  {stageCards.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-16 opacity-30 border-2 border-dashed border-[#3B252C]/20 rounded-2xl mx-2">
+                      <Tag size={24} className="mb-2 text-[#AEA4BF]" />
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-[#3B252C]">Empty Stage</span>
+                    </div>
+                  )}
+                </DroppableColumn>
+              );
             })}
-            </div>
+          </div>
         </DndContext>
       </div>
     </div>
